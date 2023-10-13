@@ -26,9 +26,10 @@ public class WebSocketController {
 	@SendTo("/topic/chat/{chatId}")
 	public List<UserText> sendMessageWithWebsocket(@DestinationVariable String chatId,
 			@Payload Message<UserText> message) {
-		log.debug("new message arrived in chat with id %s", chatId);
+		log.info("new message arrived in chat with id {}", chatId);
 		List<UserText> messages = this.chats.getOrDefault(chatId, new ArrayList<UserText>());
 		messages.add(message.getPayload());
+		chats.put(chatId, messages);
 		return messages;
 	}
 }
