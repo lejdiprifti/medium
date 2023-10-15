@@ -35,12 +35,12 @@ class Message extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12.0),
             margin: isUserMessage
-                ? EdgeInsets.only(right: 10.0)
-                : EdgeInsets.only(left: 10.0),
+                ? const EdgeInsets.only(right: 10.0)
+                : const EdgeInsets.only(left: 10.0),
             decoration: BoxDecoration(
               color: isUserMessage
-                  ? Color.fromARGB(255, 88, 165, 0)
-                  : Color.fromARGB(255, 35, 88, 0),
+                  ? const Color.fromARGB(255, 88, 165, 0)
+                  : const Color.fromARGB(255, 35, 88, 0),
               borderRadius: isUserMessage
                   ? const BorderRadius.only(
                       topLeft: Radius.circular(12.0),
