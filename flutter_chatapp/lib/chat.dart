@@ -1,18 +1,56 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:web_socket_channel/io.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:stomp_dart_client/stomp.dart';
+import 'package:stomp_dart_client/stomp_config.dart';
+import 'package:stomp_dart_client/stomp_frame.dart';
 
 class Chat extends StatefulWidget {
-  const Chat({super.key});
+  final String chatId;
+  final String userId;
+  const Chat({super.key, required this.chatId, required this.userId});
 
   @override
-  _ChatState createState() => _ChatState();
+  ChatState createState() => ChatState();
 }
 
-class _ChatState extends State<Chat> {
-  final _channel =
-      WebSocketChannel.connect(Uri.parse('ws://192.168.1.7:8080/websocket'));
+class ChatState extends State<Chat> {
+  final String webSocketUrl = 'ws://192.168.1.7:8080/websocket';
+  late StompClient _client;
   final TextEditingController _controller = TextEditingController();
+  List<dynamic> messages = List.empty();
+  @override
+  void initState() {
+    super.initState();
+    _client = StompClient(
+        config: StompConfig(url: webSocketUrl, onConnect: onConnectCallback));
+    _client.activate();
+  }
+
+  void onConnectCallback(StompFrame connectFrame) {
+    _client.subscribe(
+        destination: '/topic/chat/${widget.chatId}',
+        headers: {},
+        callback: (frame) {
+          print(frame.body);
+          // Received a frame for this subscription
+          messages = jsonDecode(frame.body!);
+        });
+  }
+
+  void _sendMessage() {
+    final message = _controller.text;
+    if (message.isNotEmpty) {
+      _client.send(
+        destination: '/app/chat/${widget.chatId}', // Replace with your chat ID
+        body: json.encode({
+          'data': message,
+          'userId': widget.userId
+        }), // Format the message as needed
+      );
+      _controller.clear();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,12 +70,17 @@ class _ChatState extends State<Chat> {
               ),
             ),
             const SizedBox(height: 24),
-            StreamBuilder(
-              stream: _channel.stream,
-              builder: (context, snapshot) {
-                return Text(snapshot.hasData ? '${snapshot.data}' : '');
+            ListView.builder(
+              itemCount: messages.length,
+              itemBuilder: (context, index) {
+                // Extract the item from the list
+                Map<String, dynamic> item = messages[index];
+
+                // Create a Text widget for the item
+                return Text(item['data']);
+                // You can add more widgets here, e.g., icons, buttons, etc.
               },
-            )
+            ),
           ],
         ),
       ),
@@ -49,16 +92,9 @@ class _ChatState extends State<Chat> {
     );
   }
 
-  void _sendMessage() {
-    if (_controller.text.isNotEmpty) {
-      print('sending message');
-      _channel.sink.add(_controller.text);
-    }
-  }
-
   @override
   void dispose() {
-    _channel.sink.close();
+    _client.deactivate();
     _controller.dispose();
     super.dispose();
   }
