@@ -34,7 +34,7 @@ class ChatState extends State<Chat> {
         callback: (frame) {
           print(frame.body);
           // Received a frame for this subscription
-          messages = jsonDecode(frame.body!);
+          messages = jsonDecode(frame.body!).reversed.toList();
         });
   }
 
@@ -54,6 +54,7 @@ class ChatState extends State<Chat> {
 
   @override
   Widget build(BuildContext context) {
+    double screenHeight = MediaQuery.of(context).size.height - 250;
     return Scaffold(
       appBar: AppBar(
         title: Text('Chat'),
@@ -70,17 +71,24 @@ class ChatState extends State<Chat> {
               ),
             ),
             const SizedBox(height: 24),
-            ListView.builder(
-              itemCount: messages.length,
-              itemBuilder: (context, index) {
-                // Extract the item from the list
-                Map<String, dynamic> item = messages[index];
+            SingleChildScrollView(
+              child: Container(
+                height: screenHeight, // Set a fixed height here
+                child: ListView.builder(
+                  itemCount: messages.length,
+                  itemBuilder: (context, index) {
+                    // Extract the item from the list
+                    Map<String, dynamic> item = messages[index];
 
-                // Create a Text widget for the item
-                return Text(item['data']);
-                // You can add more widgets here, e.g., icons, buttons, etc.
-              },
-            ),
+                    // Create a Text widget for the item
+                    return ListTile(
+                      title: Text(item['data']),
+                      // You can add more widgets here, e.g., icons, buttons, etc.
+                    );
+                  },
+                ),
+              ),
+            )
           ],
         ),
       ),
