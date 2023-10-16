@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chatapp/chat.dart';
 import 'package:flutter_chatapp/message.dart';
 
 void main() {
@@ -32,13 +33,6 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: const Column(
-          children: [
-            const Message(
-                message: 'hello there', name: 'lejdi', isUserMessage: true),
-            const Message(
-                message: 'hello there', name: 'user2', isUserMessage: false)
-          ],
-        ));
+        home: const Chat());
   }
 }
