@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.2.0</version>
+		<relativePath /> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>com.lejdiprifti</groupId>
+	<artifactId>metrics-publisher</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>metrics-publisher</name>
+	<description>Demo project for publishing metrics in prometheus</description>
+	<properties>
+		<java.version>17</java.version>
+		<project.microservice>metrics-publisher</project.microservice>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>io.fabric8</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>0.40.3</version>
+				<configuration>
+					<images>
+						<image>
+							<name>ms-${project.microservice}</name>
+							<build>
+								<from>openjdk:17-oracle</from>
+								<maintainer>freelancer@lejdiprifti.com</maintainer>
+								<tags>
+									<tag>latest</tag>
+									<tag>${project.version}</tag>
+								</tags>
+								<ports>
+									<port>8080</port>
+								</ports>
+								<volumes>
+									<volume>/tmp</volume>
+								</volumes>
+								<cmd>
+									<shell>java $JVM_OPTS $TIMEZONE $JAVA_OPTS \
+										-Djava.security.egd=file:/dev/./urandom -jar \
+										/opt/springboot/${project.build.finalName}.jar</shell>
+								</cmd>
+								<assembly>
+									<targetDir>/opt/springboot</targetDir>
+									<descriptorRef>artifact</descriptorRef>
+								</assembly>
+							</build>
+						</image>
+					</images>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
