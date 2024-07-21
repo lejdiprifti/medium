@@ -17,7 +17,7 @@ import com.medium.websocket.beans.UserText;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-//@Controller
+@Controller
 public class WebSocketController {
 
 	private final Map<String, List<UserText>> chats = new HashMap<>();
