@@ -2,6 +2,7 @@ import { Client } from '@stomp/stompjs';
 import { useEffect, useState } from 'react';
 import './App.css';
 import logo from './logo.svg';
+import SockJS from 'sockjs-client';
 
 function App() {
   let client: Client | null = null;
@@ -10,12 +11,14 @@ function App() {
 
   useEffect(() => {
     // Create a WebSocket connection
-
-    client = new Client();
-
     // Configure the WebSocket endpoint URL
-    const websocketUrl = 'ws://localhost:8080/websocket'; // Replace with your WebSocket endpoint URL
-
+    const websocketUrl = 'https://priftil.c2mar.dev.linfa.services/svcs-cent/ws'; // Replace with your WebSocket endpoint URL
+    const socket = new SockJS(
+      `${websocketUrl}`
+    );
+    client = new Client({
+      webSocketFactory: () => socket
+    });
     // Connect to the WebSocket server
     client.configure({
       brokerURL: websocketUrl,
@@ -24,8 +27,17 @@ function App() {
       },
       onConnect: () => {
         // Perform actions after successful connection
-        const destination = `/topic/chat/${chatId}`; // Specify the destination for the server-side message handler
-        client && client.subscribe(destination, (message) => {
+        const destination = `/app/playback`; // Specify the destination for the server-side message handler
+        const message = {
+          destination,
+          body: JSON.stringify({
+            'startInterval': Date.UTC(2024, 6, 16, 13, 8),
+            'endInterval': Date.UTC(2024, 6, 17)
+          })
+        };
+        console.log(message)
+        client && client.publish(message)
+        client && client.subscribe('/topic/playback', (message) => {
           console.log('Received message:', JSON.parse(message.body));
           // Process the received message as needed
         });
